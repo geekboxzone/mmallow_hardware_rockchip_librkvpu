@@ -330,6 +330,22 @@ RK_S32 VPUClientGetIOMMUStatus()
     ALOGV("vpu_service_iommu_status %d",vpu_service_iommu_status);
     return vpu_service_iommu_status;
 }
+RK_U32 VPUCheckSupportWidth(){
+   VPUHwDecConfig_t hwCfg;
+   int fd = -1;
+   fd = open("/dev/vpu_service", O_RDWR);
+   memset(&hwCfg, 0, sizeof(VPUHwDecConfig_t));
+   if(fd >= 0){
+      if(VPUClientGetHwCfg(fd, (RK_U32*)&hwCfg, sizeof(hwCfg))){
+          ALOGE("Get HwCfg failed\n");
+          close(fd);
+          return -1;
+      }
+      close(fd);
+      fd = -1;
+   }
+   return hwCfg.maxDecPicWidth;
+}
 #if BUILD_VPU_TEST
 #include <pthread.h>
 #define MAX_THREAD_NUM      10

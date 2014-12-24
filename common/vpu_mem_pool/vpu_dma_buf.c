@@ -2,7 +2,7 @@
 #include <sys/mman.h>
 #include <stdbool.h>
 
-#include <ion/rockchip_ion.h>
+#include <linux/rockchip_ion.h>
 #include <ion/ion.h>
 
 #include <cutils/log.h>

@@ -510,8 +510,8 @@ void ion_mytest1()
 {
 	int fd, map_fd, ret;
 	size_t i;
-	struct ion_handle *handle;
-    struct ion_handle *handle2;
+	ion_user_handle_t handle;
+    ion_user_handle_t handle2;
 	unsigned long phys = 0;
 	unsigned char *ptr;
 	int count = 0;

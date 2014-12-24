@@ -200,7 +200,7 @@ static int ion_alloc_vpu(struct ion_device_t *ion, unsigned long size, enum _ion
 
     hnd->fd = fd_data.fd;
     hnd->pid = getpid();
-    hnd->handle = (struct ion_handle *)fd_data.handle;
+    hnd->handle = (ion_user_handle_t)fd_data.handle;
     hnd->s_num_ints = NUM_INTS;
     hnd->s_num_fds = NUM_FDS;
     hnd->s_magic = MAGIC;
@@ -387,7 +387,7 @@ static int ion_map_vpu(struct ion_device_t *ion, int share_fd, ion_buffer_t **da
 
     hnd->fd = share_fd;
     hnd->pid = getpid();
-    hnd->handle = (struct ion_handle *)fd_data.handle;
+    hnd->handle = (ion_user_handle_t)fd_data.handle;
     hnd->s_num_ints = NUM_INTS;
     hnd->s_num_fds = NUM_FDS;
     hnd->s_magic = MAGIC;

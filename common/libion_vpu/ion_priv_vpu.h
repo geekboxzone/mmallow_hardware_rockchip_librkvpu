@@ -21,7 +21,7 @@ typedef struct private_handle_t {
     struct ion_buffer_t data;
     int fd;
     int pid;
-    struct ion_handle *handle;
+    ion_user_handle_t handle;
 #define NUM_INTS    2
 #define NUM_FDS     1
 #define MAGIC       0x3141592

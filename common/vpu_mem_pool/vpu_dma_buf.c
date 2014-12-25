@@ -63,7 +63,7 @@ typedef struct VPUMemLinear_dmabuf {
 #endif
     int origin_fd;
     int hdl;
-    struct ion_handle* handle;
+    ion_user_handle_t handle;
     void *priv;
     struct list_head mgr_lnk;
     int status;
@@ -273,7 +273,7 @@ static int vpu_dmabuf_free(struct vpu_dmabuf_dev *idev, VPUMemLinear_t *idata)
 
     err = ion_free(dev->ion_client, data->handle);
     if (err) {
-        DMABUF_ERR("ion free failed, handle %p\n", data->handle);
+        DMABUF_ERR("ion free failed, handle %d\n", data->handle);
         return err;
     }
 
@@ -362,7 +362,7 @@ static int vpu_dmabuf_share(struct vpu_dmabuf_dev *idev,
 
     err = ion_share(dev->ion_client, data->handle, &share_fd);
     if (err) {
-        DMABUF_ERR("ion share failed, input handle %p\n", data->handle);
+        DMABUF_ERR("ion share failed, input handle %d\n", data->handle);
         return err;
     }
 
@@ -377,7 +377,7 @@ static int vpu_dmabuf_share(struct vpu_dmabuf_dev *idev,
     out->vir_addr = NULL;
     out->cfg.phy_addr = data->cfg.phy_addr;
     out->size     = data->size;
-    out->handle   = NULL;
+    out->handle   = 0;
     out->priv     = data->priv;
     out->status = DMABUF_STATUS_SHARE;
 
@@ -426,8 +426,8 @@ static int vpu_dmabuf_map(struct vpu_dmabuf_dev *idev,
         dmabuf = (VPUMemLinear_dmabuf*)*data;
         share_fd = dmabuf->hdl;
 
-        if (dmabuf->handle != NULL) {
-            DMABUF_ERR("Memory Handle %p, nothing to map\n", dmabuf->handle);
+        if (dmabuf->handle) {
+            DMABUF_ERR("Memory Handle %d, nothing to map\n", dmabuf->handle);
             return -EINVAL;
         }
 
@@ -567,7 +567,7 @@ static int vpu_dmabuf_unmap(struct vpu_dmabuf_dev *idev, VPUMemLinear_t *idata)
     
     err = ion_free(dev->ion_client, data->handle);
     if (err) {
-        DMABUF_ERR("ion free failed, handle %p\n", data->handle);
+        DMABUF_ERR("ion free failed, handle %d\n", data->handle);
         return err;
     }
     

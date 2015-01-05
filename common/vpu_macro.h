@@ -120,8 +120,6 @@
            (((a) >> 8) & 0xff00) | (((a) >> 24) & 0xff))
 #define     CLIP(X,AMIN,AMAX)   (((X)<(AMIN)) ? (AMIN) : ((X)>(AMAX)) ? (AMAX) : (X))
 
-#define     rd(addr)            *((unsigned int volatile*)(addr))
-#define     wr(addr, value)     *(((unsigned int volatile*)(addr))) = value
 
 //#define FRAME_COPY
 

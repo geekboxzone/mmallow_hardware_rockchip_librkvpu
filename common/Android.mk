@@ -35,9 +35,7 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH) \
 LOCAL_C_INCLUDES += \
         system/core/libion/include \
         system/core/libion/kernel-headers
-
 LOCAL_SRC_FILES := vpu_mem_dmabuf.c \
-                   vpu_drv.c \
 				   rk_list.cpp \
 				   vpu_mem_pool/vpu_mem_pool.c \
 				   vpu_mem_pool/vpu_dma_buf.c \

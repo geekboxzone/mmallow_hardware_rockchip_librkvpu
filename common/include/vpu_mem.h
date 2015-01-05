@@ -16,7 +16,7 @@ typedef struct VPUMem {
     RK_U32  phy_addr;
     RK_U32  *vir_addr;
     RK_U32  size;
-    RK_S32  offset;
+    RK_U32  *offset;
 #ifdef RVDS_PROGRAME
     RK_U8  *pbase;
 #endif

@@ -90,224 +90,85 @@ static int vpu_service_iommu_status = -1;
 int VPUClientInit(VPU_CLIENT_TYPE type)
 {
     VPU_SERVICE_TEST;
-    if (vpu_service_status) {
-        int ret;
-        int fd;
-        if (type != VPU_DEC_HEVC) {
-            fd = open("/dev/vpu_service", O_RDWR);
-        } else {
-            fd = open("/dev/hevc_service", O_RDWR);
-            type = VPU_DEC;
-        }
-        if (fd == -1) {
-            ALOGE("VPUClient: failed to open vpu_service\n");
-            return -1;
-        }
-        ret = ioctl(fd, VPU_IOC_SET_CLIENT_TYPE, (RK_U32)type);
-        if (ret) {
-            ALOGE("VPUClient: ioctl VPU_IOC_SET_CLIENT_TYPE failed ret %d\n", ret);
-            return -2;
-        }
-        return fd;
+    int ret;
+    int fd;
+    if (type != VPU_DEC_HEVC) {
+        fd = open("/dev/vpu_service", O_RDWR);
     } else {
-        int socket = -1;
-        VPU_CMD_TYPE cmd;
-        VPU_REGISTER_S chn;
-
-        VPU_DEBUG("VPU: VPUClientInit\n");
-
-        /* create socket */
-        socket = socket_local_client("vpu_server", ANDROID_SOCKET_NAMESPACE_RESERVED,
-                SOCK_STREAM);
-        if (socket < 0)
-        {
-            VPU_DEBUG("VPU: socket vpu_server link fail\n");
-            return socket;
-        }
-
-        VPU_DEBUG("VPU: VPU client %d link success\n", socket);
-
-        chn.client_type = type;
-
-        chn.pid = gettid();
-
-        VPU_DEBUG("VPU: VPU client getpid %d\n", chn.pid);
-
-        if ((VPU_SUCCESS == VPUSendMsg(socket, VPU_CMD_REGISTER, &chn, sizeof(VPU_REGISTER_S), 0)) &&
-                (VPU_FAILURE != VPURecvMsg(socket, &cmd, NULL, 0, 0)) &&
-                (VPU_CMD_REGISTER_ACK_OK == cmd))
-        {
-            VPU_DEBUG("VPUClientInit success\n");
-        }
-        else
-        {
-            VPU_DEBUG("VPUClientInit fail 0\n");
-            if (-1 != socket)
-            {
-                shutdown(socket, SHUT_RDWR);
-                close(socket);
-                socket = -1;
-            }
-
-            VPU_DEBUG("VPUClientInit fail 1\n");
-        }
-
-        return socket;
+        fd = open("/dev/hevc_service", O_RDWR);
+        type = VPU_DEC;
     }
+    if (fd == -1) {
+        ALOGE("VPUClient: failed to open vpu_service\n");
+        return -1;
+    }
+    ret = ioctl(fd, VPU_IOC_SET_CLIENT_TYPE, (RK_U32)type);
+    if (ret) {
+        ALOGE("VPUClient: ioctl VPU_IOC_SET_CLIENT_TYPE failed ret %d errno %d\n", ret,errno);
+        return -2;
+    }
+    return fd;
 }
 
 RK_S32 VPUClientRelease(int socket)
 {
     VPU_SERVICE_TEST;
-    if (vpu_service_status) {
-        int fd = socket;
-        if (fd > 0) {
-            close(fd);
-        }
-        return VPU_SUCCESS;
-    } else {
-        if (-1 != socket)
-        {
-            while (VPUSendMsg(socket, VPU_CMD_UNREGISTER, NULL, 0, 0))
-                usleep(10);
-
-            // TODO: 这里是否还要 shutdown 和 close，好像服务器端会做同样的操作
-            shutdown(socket, SHUT_RDWR);
-
-            close(socket);
-
-            socket = -1;
-        }
-
-        VPU_DEBUG("VPUClientRelease success\n");
-
-        return VPU_SUCCESS;
+    int fd = socket;
+    if (fd > 0) {
+        close(fd);
     }
+    return VPU_SUCCESS;
 }
 
 RK_S32 VPUClientSendReg(int socket, RK_U32 *regs, RK_U32 nregs)
 {
     VPU_SERVICE_TEST;
-    if (vpu_service_status) {
-        int fd = socket;
-        RK_S32 ret;
-        VPUReq_t req;
-        nregs *= sizeof(RK_U32);
-        req.req     = regs;
-        req.size    = nregs;
-        ret = (RK_S32)ioctl(fd, VPU_IOC_SET_REG, (RK_U32)&req);
-        if (ret) {
-            ALOGE("VPUClient: ioctl VPU_IOC_SET_REG failed ret %d errno %d %s\n", ret, errno, strerror(errno));
-        }
-        return ret;
-    } else {
-        nregs *= sizeof(RK_U32);
-        RK_S32 ret = VPUSendMsg(socket, VPU_SEND_CONFIG, regs, nregs, 0);
-
-        if (VPU_SUCCESS == ret)
-        {
-            VPU_DEBUG("VPUClientSendReg VPUSendMsg success\n");
-        }
-        else
-        {
-            VPU_DEBUG("VPUClientSendReg VPUSendMsg fail\n");
-        }
-
-        return ret;
+    int fd = socket;
+    RK_S32 ret;
+    VPUReq_t req;
+    nregs *= sizeof(RK_U32);
+    req.req     = regs;
+    req.size    = nregs;
+    ret = (RK_S32)ioctl(fd, VPU_IOC_SET_REG, &req);
+    if (ret) {
+        ALOGE("VPUClient: ioctl VPU_IOC_SET_REG failed ret %d errno %d %s\n", ret, errno, strerror(errno));
     }
+    return ret;
 }
 
 // TODO: 看是否客户端需要返回消息的长度
 RK_S32 VPUClientWaitResult(int socket, RK_U32 *regs, RK_U32 nregs, VPU_CMD_TYPE *cmd, RK_S32 *len)
 {
     VPU_SERVICE_TEST;
-    if (vpu_service_status) {
-        int fd = socket;
-        RK_S32 ret;
-        VPUReq_t req;
-        nregs *= sizeof(RK_U32);
-        req.req     = regs;
-        req.size    = nregs;
-        ret = (RK_S32)ioctl(fd, VPU_IOC_GET_REG, (RK_U32)&req);
-        if (ret) {
-            ALOGE("VPUClient: ioctl VPU_IOC_GET_REG failed ret %d errno %d %s\n", ret, errno, strerror(errno));
-            *cmd = VPU_SEND_CONFIG_ACK_FAIL;
-        } else {
-            *cmd = VPU_SEND_CONFIG_ACK_OK;
-        }
-        return ret;
+    int fd = socket;
+    RK_S32 ret;
+    VPUReq_t req;
+    nregs *= sizeof(RK_U32);
+    req.req     = regs;
+    req.size    = nregs;
+    ret = (RK_S32)ioctl(fd, VPU_IOC_GET_REG, &req);
+    if (ret) {
+        ALOGE("VPUClient: ioctl VPU_IOC_GET_REG failed ret %d errno %d %s\n", ret, errno, strerror(errno));
+        *cmd = VPU_SEND_CONFIG_ACK_FAIL;
     } else {
-        RK_S32 ret;
-        RK_S32 retlen = -1;
-        nregs *= sizeof(RK_U32);
-
-        VPU_DEBUG("VPUClientWaitResult start\n");
-
-        retlen = VPURecvMsg(socket, cmd, regs, nregs, 0);
-
-        if (retlen >= 0)
-        {
-            VPU_DEBUG("VPUClientWaitResult success\n");
-            ret = VPU_SUCCESS;
-        }
-        else
-        {
-            VPU_DEBUG("VPUClientWaitResult fail\n");
-            ret = VPU_FAILURE;
-        }
-
-        *len = retlen;
-
-        return ret;
+        *cmd = VPU_SEND_CONFIG_ACK_OK;
     }
+    return ret;
 }
 
 RK_S32 VPUClientGetHwCfg(int socket, RK_U32 *cfg, RK_U32 cfg_size)
 {
     VPU_SERVICE_TEST;
-    if (vpu_service_status) {
-        int fd = socket;
-        RK_S32 ret;
-        VPUReq_t req;
-        req.req     = cfg;
-        req.size    = cfg_size;
-        ret = (RK_S32)ioctl(fd, VPU_IOC_GET_HW_FUSE_STATUS, (RK_U32)&req);
-        if (ret) {
-            ALOGE("VPUClient: ioctl VPU_IOC_GET_HW_FUSE_STATUS failed ret %d\n", ret);
-        }
-        return ret;
-    } else {
-        RK_S32 ret;
-        RK_S32 retlen = -1;
-        VPU_CMD_TYPE cmd;
-
-        ret = VPUSendMsg(socket, VPU_GET_HW_INFO, NULL, 0, 0);
-
-        if (VPU_SUCCESS == ret)
-        {
-            VPU_DEBUG("VPUClientGetHwCfg VPUSendMsg success\n");
-        }
-        else
-        {
-            VPU_DEBUG("VPUClientGetHwCfg VPUSendMsg fail\n");
-            return ret;
-        }
-
-        retlen = VPURecvMsg(socket, &cmd, cfg, cfg_size, 0);
-
-        if ((0 < retlen) && (retlen <= (RK_S32)cfg_size) && (VPU_GET_HW_INFO_ACK_OK == cmd))
-        {
-            VPU_DEBUG("VPUClientGetHwCfg VPURecvMsg success\n");
-            ret = VPU_SUCCESS;
-        }
-        else
-        {
-            VPU_DEBUG("VPUClientGetHwCfg VPURecvMsg fail\n");
-            ret = VPU_FAILURE;
-        }
-
-        return ret;
+    int fd = socket;
+    RK_S32 ret;
+    VPUReq_t req;
+    req.req     = cfg;
+    req.size    = cfg_size;
+    ret = (RK_S32)ioctl(fd, VPU_IOC_GET_HW_FUSE_STATUS, &req);
+    if (ret) {
+        ALOGE("VPUClient: ioctl VPU_IOC_GET_HW_FUSE_STATUS failed ret %d\n", ret);
     }
+    return ret;
 }
 
 RK_S32 VPUClientGetIOMMUStatus()
@@ -317,7 +178,7 @@ RK_S32 VPUClientGetIOMMUStatus()
         int fd = -1;
         fd = open("/dev/vpu_service", O_RDWR);
         if(fd >= 0){
-            ret = (RK_S32)ioctl(fd, VPU_IOC_PROBE_IOMMU_STATUS, (RK_U32)&vpu_service_iommu_status);
+            ret = (RK_S32)ioctl(fd, VPU_IOC_PROBE_IOMMU_STATUS, &vpu_service_iommu_status);
             if (ret) {
                 vpu_service_iommu_status = 0;
                 ALOGE("VPUClient: ioctl VPU_IOC_PROBE_IOMMU_STATUS failed ret %d, disable iommu\n", ret);

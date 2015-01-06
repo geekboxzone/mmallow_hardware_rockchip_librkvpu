@@ -531,6 +531,39 @@ static int vpu_dmabuf_map(struct vpu_dmabuf_dev *idev,
     return 0;
 }
 
+static int vpu_dmabuf_get_phyaddress(struct vpu_dmabuf_dev *idev,
+                          int share_fd,uint32_t *phy_addr)
+{
+    int err = 0;
+    int map_fd = -1;
+    struct ion_phys_data phys_data;
+    VPUMemLinear_dmabuf *dmabuf;
+    vpu_dmabuf_dev_impl *dev = (vpu_dmabuf_dev_impl*)idev;
+    ion_user_handle_t * handle = NULL;
+
+    if (dev == NULL) {
+        DMABUF_ERR("device is NULL\n");
+        return -EINVAL;
+    }
+    err = ion_import(dev->ion_client, share_fd, &handle);
+    if (err) {
+        DMABUF_ERR("ion import failed, share fd %d\n", share_fd);
+        return err;
+    }
+    if (vpu_mem_judge_used_heaps_type() == ION_HEAP(ION_CMA_HEAP_ID)) {
+        phys_data.handle = handle;
+        err = ion_custom_op(dev, ION_IOC_GET_PHYS, &phys_data);
+        if (err) {
+            ion_free(dev->ion_client,handle);
+            return err;
+        }
+        *phy_addr = phys_data.phys;
+    } else {
+        *phy_addr = share_fd;
+    }
+    ion_free(dev->ion_client,handle);
+    return 0;
+}
 static int vpu_dmabuf_unmap(struct vpu_dmabuf_dev *idev, VPUMemLinear_t *idata)
 {
     int err = 0;
@@ -668,6 +701,7 @@ int vpu_dmabuf_open(unsigned long align, struct vpu_dmabuf_dev **dev, char *titl
     d->get_fd = vpu_dmabuf_get_fd;
     d->get_ref = vpu_dmabuf_get_ref;
     d->get_priv = vpu_dmabuf_get_priv;
+    d->get_phyaddr = vpu_dmabuf_get_phyaddress;
     d->align = align;
     
     if (strlen(title) != 0) {

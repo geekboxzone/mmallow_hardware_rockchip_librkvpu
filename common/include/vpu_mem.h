@@ -40,6 +40,7 @@ RK_S32 VPUMallocLinearFromRender(VPUMemLinear_t *p, RK_U32 size, void *ctx);
 RK_S32 VPUMemGetFD(VPUMemLinear_t *p);
 RK_S32 VPUMemGetREF(VPUMemLinear_t *p);
 RK_S32 VPUMemJudgeIommu();
+RK_S32 VPUMemImport_phyaddr(int share_fd,RK_U32 *phy_addr);
 
 // new malloc interface by with allocator for memory management
 typedef void*   RK_HANDLE;

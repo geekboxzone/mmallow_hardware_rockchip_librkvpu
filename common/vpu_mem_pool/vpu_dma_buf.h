@@ -14,7 +14,8 @@
     int (*get_origin_fd)(VPUMemLinear_t *idata); \
     int (*get_fd)(VPUMemLinear_t *idata); \
     int (*get_ref)(VPUMemLinear_t *idata); \
-    void* (*get_priv)(VPUMemLinear_t *idata);
+    void* (*get_priv)(VPUMemLinear_t *idata);\
+    int (*get_phyaddr)(struct vpu_dmabuf_dev *dev,int share_fd,uint32_t *phy_addr);
 
 typedef struct vpu_dmabuf_dev {
     vpu_dmabuf_dev_FIELDS

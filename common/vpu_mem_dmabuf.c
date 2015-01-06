@@ -666,6 +666,18 @@ RK_S32 VPUMemInvalidate(VPUMemLinear_t *p)
     return 0;
 }
 
+RK_S32 VPUMemImport_phyaddr(int share_fd,RK_U32 *phy_addr){
+    struct vpu_dmabuf_dev *dev = NULL;
+    int err = vpu_dmabuf_open(ALIGN_SIZE(), &dev, "vpudmabuf");
+    if (err) {
+        VPM_ERROR("open ion client failed\n");
+        return err;
+    }
+    dev->get_phyaddr(dev,share_fd,phy_addr);
+    vpu_dmabuf_close(dev);
+    return 0;
+}
+
 #if BUILD_VPU_MEM_TEST
 #define MAX_MEM    100
 #define LOOP_MEM   5000

@@ -1,3 +1,30 @@
+/*
+ *
+ * Copyright 2014 Rockchip Electronics S.LSI Co. LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+   * File:
+   * vpu_mem_pool.c
+   * Description:
+   *
+   * Author:
+   *     Alpha Lin
+   * Date:
+   *    2014-1-23
+ */
+
 #include <malloc.h>
 #include <stdio.h>
 #include <assert.h>
@@ -77,11 +104,11 @@ typedef struct vpu_display_mem_pool_impl {
     int ion_client;
     bool wait_recalim_flag;
     tsem_t reclaim_sem;
-#endif    
+#endif
 #if VPU_MEMORY_POOL_MANAGER_ENABLE
     struct list_head mgr_link;
 #endif
-} vpu_display_mem_pool_impl;    
+} vpu_display_mem_pool_impl;
 
 #if VPU_MEMORY_POOL_MANAGER_ENABLE
 typedef struct vpu_memory_pool_manager {
@@ -98,9 +125,9 @@ vpu_memory_pool_manager pool_manager;
 
 static struct vpu_memory_block* create_memblk_from_hdl(int mem_hdl)
 {
-    struct vpu_memory_block *memblk = 
+    struct vpu_memory_block *memblk =
         (struct vpu_memory_block*)calloc(1, sizeof(struct vpu_memory_block));
-    
+
     if (memblk == NULL) {
         MBLK_ERR("malloc memory block failed\n");
         return NULL;
@@ -110,7 +137,7 @@ static struct vpu_memory_block* create_memblk_from_hdl(int mem_hdl)
     memblk->mem_hdl = mem_hdl;
 
     INIT_LIST_HEAD(&memblk->lnk_status);
-    
+
     return memblk;
 }
 
@@ -128,7 +155,7 @@ static int get_free_memory_handle(vpu_display_mem_pool *p)
         MBLK_ERR("memory pool pre-init\n");
         return -1;
     }
-    
+
     if (ETIMEDOUT == tsem_timed_down(&p_mempool->acq_sem, 1000)) {
         MBLK_ERR("timeout when acquire memory handle\n");
         return -1;
@@ -182,11 +209,11 @@ static int inc_used_memory_handle_ref(vpu_display_mem_pool *p, int mem_hdl)
     }
     list_for_each_entry_safe(mblk, n, &p_mempool->used_list, lnk_status) {
         if (mblk->mem_hdl == mem_hdl) {
-            MBLK_DBG("used memory block (fd = %d, ref = %d) find out in list\n", 
+            MBLK_DBG("used memory block (fd = %d, ref = %d) find out in list\n",
                 mblk->mem_hdl, atomic_read(&mblk->ref));
 
             atomic_inc(&mblk->ref);
-            
+
             pthread_mutex_unlock(&p_mempool->list_mutex);
 
             return 0;
@@ -232,7 +259,7 @@ static int put_used_memory_handle(vpu_display_mem_pool *p, int mem_hdl)
 
     list_for_each_entry_safe(mblk, n, &p_mempool->used_list, lnk_status) {
         if (mblk->mem_hdl == mem_hdl) {
-            MBLK_DBG("used memory block (fd = %d, ref = %d) find out in list\n", 
+            MBLK_DBG("used memory block (fd = %d, ref = %d) find out in list\n",
                 mblk->mem_hdl, atomic_read(&mblk->ref));
             atomic_dec(&mblk->ref);
             if (0 == atomic_read(&mblk->ref)) {
@@ -254,7 +281,7 @@ static int put_used_memory_handle(vpu_display_mem_pool *p, int mem_hdl)
             	list_add_tail(&mblk->lnk_status, &p_mempool->free_list);
 
             	atomic_dec(&p_mempool->used_cnt);
-		
+
 				if (p_mempool->wait_recalim_flag)
 					tsem_up(&p_mempool->reclaim_sem);
                 tsem_up(&p_mempool->acq_sem);
@@ -297,7 +324,7 @@ static int commit_memory_handle(vpu_display_mem_pool *p, int mem_hdl, int size)
     vpu_display_mem_pool_impl *p_mempool = (vpu_display_mem_pool_impl*)p;
     VPUMemLinear_t *dmabuf = NULL;
     int ret = 0;
-    
+
     MBLK_DBG("In\n");
 
     assert(p_mempool);
@@ -346,7 +373,7 @@ static int reset_vpu_mem_pool(vpu_display_mem_pool *p)
     atomic_set(&p_mempool->used_cnt, 0);
     tsem_up(&p_mempool->acq_sem);
     tsem_reset(&p_mempool->acq_sem);
-    
+
 #if ENABLE_VPU_MEMORY_POOL_ALLOCATOR
     list_for_each_entry_safe(mblk, n, &p_mempool->free_list, lnk_status) {
         if (mblk) {
@@ -366,7 +393,7 @@ static int reset_vpu_mem_pool(vpu_display_mem_pool *p)
             atomic_inc(&p_mempool->abort_cnt);
         }
     }
-#endif    
+#endif
 
     INIT_LIST_HEAD(&p_mempool->free_list);
     INIT_LIST_HEAD(&p_mempool->used_list);
@@ -395,7 +422,7 @@ vpu_display_mem_pool* open_vpu_memory_pool()
     if (p_mempool == NULL) {
         return NULL;
     }
-    
+
 #if VPU_MEMORY_POOL_MANAGER_ENABLE
     if (atomic_read(&pool_manager.init) != VPU_MEM_POOL_INIT_MAGIC) {
         INIT_LIST_HEAD(&pool_manager.pend_pool_list);
@@ -405,8 +432,8 @@ vpu_display_mem_pool* open_vpu_memory_pool()
         atomic_set(&pool_manager.init, VPU_MEM_POOL_INIT_MAGIC);
         atomic_set(&pool_manager.total_mem_size, 0);
     }
-#endif    
-    
+#endif
+
 #if ENABLE_VPU_MEMORY_POOL_ALLOCATOR
     if (dmabuf_dev == NULL) {
         if (0 > vpu_dmabuf_open(4096, &dmabuf_dev, "inneralloc")) {
@@ -414,7 +441,7 @@ vpu_display_mem_pool* open_vpu_memory_pool()
             return NULL;
         }
     }
-#endif    
+#endif
 
     atomic_set(&p_mempool->used_cnt, 0);
     atomic_set(&p_mempool->abort_cnt, 0);
@@ -431,7 +458,7 @@ vpu_display_mem_pool* open_vpu_memory_pool()
     p_mempool->get_free   = get_free_memory_handle;
 #else
     p_mempool->get_free   = get_free_memory_vpumem;
-#endif      
+#endif
     p_mempool->put_used   = put_used_memory_handle;
     p_mempool->inc_used   = inc_used_memory_handle_ref;
     p_mempool->reset      = reset_vpu_mem_pool;
@@ -457,7 +484,7 @@ void close_vpu_memory_pool(vpu_display_mem_pool *p)
     MBLK_DBG("vpu memory pool destructure\n");
 
     assert(p_mempool);
-   
+
     pthread_mutex_lock(&p_mempool->list_mutex);
 #if ENABLE_VPU_MEMORY_POOL_ALLOCATOR
     // memory from external allocator;
@@ -477,7 +504,7 @@ void close_vpu_memory_pool(vpu_display_mem_pool *p)
             free(mblk);
         }
     }
-#endif 
+#endif
 
 #if !VPU_MEMORY_POOL_MANAGER_ENABLE
     while (atomic_read(&p_mempool->used_cnt) > 0 && trycnt-- > 0) {
@@ -493,7 +520,7 @@ void close_vpu_memory_pool(vpu_display_mem_pool *p)
         pthread_mutex_unlock(&p_mempool->list_mutex);
         return;
     }
-#endif   
+#endif
     if(atomic_read(&p_mempool->abort_cnt)){
         list_for_each_entry_safe(mblk, n, &p_mempool->abort_list, lnk_status) {
             if (mblk) {
@@ -519,7 +546,7 @@ void close_vpu_memory_pool(vpu_display_mem_pool *p)
 
     atomic_set(&p_mempool->init, 0);
     pthread_mutex_destroy(&p_mempool->list_mutex);
-    
+
     free(p_mempool);
 
     MBLK_INF("\n");
@@ -531,9 +558,9 @@ void close_vpu_memory_pool(vpu_display_mem_pool *p)
 
 static struct vpu_memory_block* create_memblk_from_vpumem(VPUMemLinear_t *dmabuf)
 {
-    struct vpu_memory_block *memblk = 
+    struct vpu_memory_block *memblk =
         (struct vpu_memory_block*)calloc(1, sizeof(struct vpu_memory_block));
-    
+
     if (memblk == NULL) {
         MBLK_ERR("malloc memory block failed\n");
         return NULL;
@@ -544,7 +571,7 @@ static struct vpu_memory_block* create_memblk_from_vpumem(VPUMemLinear_t *dmabuf
     memblk->dmabuf = dmabuf;
 
     INIT_LIST_HEAD(&memblk->lnk_status);
-    
+
     return memblk;
 }
 
@@ -645,24 +672,24 @@ static int commit_memory_vpumem(vpu_display_mem_pool *p, VPUMemLinear_t *dmabuf)
     return 0;
 }
 
-void* vpu_mem_allocator(void *param) 
+void* vpu_mem_allocator(void *param)
 {
     vpu_display_mem_pool_impl *pool = (vpu_display_mem_pool_impl*)param;
     int ret;
-    
+
     while (pool->run_flag) {
         //VPUMemLinear_t *dmabuf;
         int share_fd;
         int total_size;
-        
+
         tsem_down(&pool->alloc_sem);
-        
+
         if (!pool->run_flag) {
             break;
         }
-        
+
         MBLK_DBG("In\n");
-	
+
 #if VPU_MEMORY_POOL_MANAGER_ENABLE
         total_size = atomic_read(&pool_manager.total_mem_size);
         /*MBLK_INF("vpu memory pool size (%d)\n", total_size);*/
@@ -677,18 +704,18 @@ void* vpu_mem_allocator(void *param)
 		if (ret != ETIMEDOUT)
 			continue;
 	}
-        
+
         if (0 > ion_alloc_fd(pool->ion_client, pool->size, 4096, vpu_mem_judge_used_heaps_type(), 0, &share_fd)) {
             MBLK_ERR("ion_alloc_fd failed\n");
 	    pool->wait_recalim_flag = true;
             continue;
         }
-	
+
 #if VPU_MEMORY_POOL_MANAGER_ENABLE
         atomic_add(pool->size, &pool_manager.total_mem_size);
         MBLK_INF("vpu memory pool size (%d)\n", atomic_read(&pool_manager.total_mem_size));
-#endif	
-        
+#endif
+
         MBLK_INF("ion_alloc_fd success, memory fd %d\n", share_fd);
 
         if (0 > commit_memory_handle((vpu_display_mem_pool*)pool, share_fd, pool->size)) {
@@ -697,61 +724,61 @@ void* vpu_mem_allocator(void *param)
             continue;
         }
     }
-    
+
     return NULL;
 }
 
-int create_vpu_memory_pool_allocator(vpu_display_mem_pool **ipool, int num, int size) 
+int create_vpu_memory_pool_allocator(vpu_display_mem_pool **ipool, int num, int size)
 {
     int i;
     vpu_display_mem_pool_impl *pool;
     struct vpu_memory_block *mblk, *n;
-    
+
     if (size <= 0) {
         MBLK_ERR("Invalidate parameter, size = %d\n", size);
         return -1;
     }
-    
+
     pool = (vpu_display_mem_pool_impl *)open_vpu_memory_pool();
     tsem_init(&pool->alloc_sem, 0);
     pool->version = 2; // indicate memory from internal allocator
     pool->wait_recalim_flag = false;
     tsem_init(&pool->reclaim_sem, 0);
-    
+
     pool->ion_client = ion_open();
     if (pool->ion_client < 0) {
         MBLK_ERR("Open ion device failed\n");
         return pool->ion_client;
     }
-    
+
     pool->run_flag = true;
     pool->size = size;
     pool->buff_size = size;
-    
+
     if (pthread_create(&pool->td, NULL, vpu_mem_allocator, pool)) {
         MBLK_ERR("create allocator thread failed\n");
         goto fail;
     }
-    
+
     for (i=0; i<num; i++) {
         tsem_up(&pool->alloc_sem);
     }
-    
+
     *ipool = (vpu_display_mem_pool*)pool;
-    
+
     return 0;
-    
+
 fail:
     if (pool->td > 0) {
         pool->run_flag = false;
         tsem_up(&pool->alloc_sem);
         pthread_join(pool->td, NULL);
     }
-    
+
     if (pool->ion_client) {
         ion_close(pool->ion_client);
     }
-    
+
     close_vpu_memory_pool((vpu_display_mem_pool*)pool);
 
     return -1;
@@ -761,17 +788,17 @@ void release_vpu_memory_pool_allocator(vpu_display_mem_pool *ipool)
 {
     vpu_display_mem_pool_impl *pool = (vpu_display_mem_pool_impl*)ipool;
     struct vpu_memory_block *mblk, *n;
-    
+
     assert(pool);
-    
+
     pool->run_flag = false;
     tsem_up(&pool->alloc_sem);
     pthread_join(pool->td, NULL);
-    
+
     tsem_deinit(&pool->alloc_sem);
-    
+
     ion_close(pool->ion_client);
-    
+
     close_vpu_memory_pool((vpu_display_mem_pool*)pool);
 }
 
@@ -783,13 +810,13 @@ void* pool_manager_thread(void *param)
     while (1) {
         vpu_display_mem_pool_impl *pool = NULL, *n;
         struct vpu_memory_block *mblk, *m;
-        
+
         sleep(1);
-        
+
         if (atomic_read(&pool_manager.pend_cnt)) {
             MBLK_WRN("pools count (%d) still pending in pool manager\n", atomic_read(&pool_manager.pend_cnt));
         }
-       
+
         list_for_each_entry_safe(pool, n, &pool_manager.pend_pool_list, mgr_link) {
             if (pool) {
                 if (atomic_read(&pool->used_cnt) > 0) {
@@ -799,11 +826,11 @@ void* pool_manager_thread(void *param)
 
                 tsem_up(&pool->acq_sem);
                 tsem_deinit(&pool->acq_sem);
-            
+
                 atomic_set(&pool->init, 0);
                 pthread_mutex_destroy(&pool->list_mutex);
-            
-#if ENABLE_VPU_MEMORY_POOL_ALLOCATOR                
+
+#if ENABLE_VPU_MEMORY_POOL_ALLOCATOR
                 list_for_each_entry_safe(mblk, m, &pool->free_list, lnk_status) {
                     if (mblk) {
                         list_del_init(&mblk->lnk_status);
@@ -819,13 +846,13 @@ void* pool_manager_thread(void *param)
                         free(mblk);
                     }
                 }
-#endif                
+#endif
                 list_del_init(&pool->mgr_link);
-                   
+
                 free(pool);
-                
+
                 atomic_dec(&pool_manager.pend_cnt);
-            
+
                 MBLK_INF("\n");
             }
         }
@@ -885,7 +912,7 @@ static void* vpu_memory_status_observer(void *param)
     server_addr.sun_family = AF_UNIX;         // host byte order
     strcpy(server_addr.sun_path, "/data/vpumem_observer");
     unlink("/data/vpumem_observer");
-    
+
     if (bind(sock_fd, (struct sockaddr *)&server_addr, SUN_LEN(&server_addr)) == -1) {
         MBLK_ERR("bind error!");
         return NULL;
@@ -938,13 +965,13 @@ static void* vpu_memory_status_observer(void *param)
                     if (ret < BUF_SIZE)
                         memset(&buf[ret], '\0', 1);
                     MBLK_DBG("client[%d] send:%s\n", i, buf);
-		    
+
 		    vpu_dmabuf_dump(dmabuf_dev, "inneralloc");
 		    vpu_dmabuf_dump(VPUMemGetDev(), "vpumem");
                 }
             }
         }
-        
+
 	// check if a new connect in
         if (FD_ISSET(sock_fd, &fdsr)) {
             new_fd = accept(sock_fd, (struct sockaddr *)&client_addr, &sun_size);
@@ -952,7 +979,7 @@ static void* vpu_memory_status_observer(void *param)
                 MBLK_ERR("accept socket error!");
                 continue;
             }
-	    
+
             if (conn_amount < BACKLOG) {
                 for (i=0; i<conn_amount+1; i++) {
                     if (fd_A[i] == 0) {
@@ -968,7 +995,7 @@ static void* vpu_memory_status_observer(void *param)
                     MBLK_ERR("Error! conn_amount %d, fd_A[%d]=%d\n", conn_amount, conn_amount, fd_A[conn_amount]);
                     return NULL;
                 }
-                
+
                 conn_amount++;
             } else {
                 MBLK_INF("max connections arrive, exit\n");
@@ -979,14 +1006,14 @@ static void* vpu_memory_status_observer(void *param)
         }
         //showclient();
     }
-    
+
     // close all connection
     for (i = 0; i < BACKLOG; i++) {
         if (fd_A[i] != 0) {
             close(fd_A[i]);
         }
     }
-   
+
     MBLK_INF("observer quit\n");
     return NULL;
 }
@@ -1017,7 +1044,7 @@ void* mem_consumer_thread(void *param)
     randomnum = rand();
 
     us = randomnum * 10 / RAND_MAX + 1;
- 
+
     while (i++ < 10) {
         VPUMemLinear_t *dmabuf;
         int hdl;
@@ -1064,7 +1091,7 @@ int main(int argc, char **argv)
     create_vpu_memory_pool_allocator(&pool, 20, 3840*2160*3/2);
     outtime = GetTime();
     MBLK_DBG("create vpu memory pool consume %lld\n", outtime - intime);
-#endif    
+#endif
 
     for (i=0; i<5; i++) {
         pthread_create(&tr[i], NULL, mem_consumer_thread, pool);
@@ -1078,7 +1105,7 @@ int main(int argc, char **argv)
     close_vpu_memory_pool(pool);
 #else
     release_vpu_memory_pool_allocator(pool);
-#endif    
+#endif
 
     return 0;
 }

@@ -1,29 +1,20 @@
-/*------------------------------------------------------------------------------
---                                                                            --
---       This software is confidential and proprietary and may be used        --
---        only as expressly authorized by a licensing agreement from          --
---                                                                            --
---                            Hantro Products Oy.                             --
---                                                                            --
---                   (C) COPYRIGHT 2006 HANTRO PRODUCTS OY                    --
---                            ALL RIGHTS RESERVED                             --
---                                                                            --
---                 The entire notice above must be reproduced                 --
---                  on all copies and should not be removed.                  --
---                                                                            --
---------------------------------------------------------------------------------
---
---  Description : System Wrapper Layer for Linux. Polling version.
---
-------------------------------------------------------------------------------
---
---  Version control information, please leave untouched.
---
---  $RCSfile: dwl_x170_linux_no_drv.c,v $
---  $Revision: 1.13 $
---  $Date: 2010/03/24 06:21:33 $
---
-------------------------------------------------------------------------------*/
+/*
+ *
+ * Copyright 2010 Rockchip Electronics S.LSI Co. LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #define LOG_TAG "vpu"
 #include "vpu_type.h"
 

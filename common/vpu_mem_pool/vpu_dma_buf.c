@@ -1,3 +1,20 @@
+/*
+ *
+ * Copyright 2014 Rockchip Electronics S.LSI Co. LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <stdbool.h>
@@ -17,7 +34,7 @@
 
 #define ENABLE_DUPLICATE_WITH_REF   1
 
-//#define VPU_DMABUF_DEBUG  
+//#define VPU_DMABUF_DEBUG
 #define VPU_DMABUF_ERROR
 
 #ifdef VPU_DMABUF_DEBUG
@@ -69,7 +86,7 @@ typedef struct VPUMemLinear_dmabuf {
     int status;
 #if ENABLE_DUPLICATE_WITH_REF
     atomic_t ref_cnt;
-#endif    
+#endif
 } VPUMemLinear_dmabuf;
 
 #define ENABLE_MEMORY_MANAGE    1
@@ -81,7 +98,7 @@ int vpu_dmabuf_dump(struct vpu_dmabuf_dev *idev, const char *parent)
     VPUMemLinear_dmabuf *ldata = NULL, *n;
     int total = 0;
     int cnt = 0;
-    
+
     ALOGD("current vpu memory status in %s from %s\n", dev->title, parent);
 
     pthread_mutex_lock(&dev->list_lock);
@@ -93,9 +110,9 @@ int vpu_dmabuf_dump(struct vpu_dmabuf_dev *idev, const char *parent)
         }
     }
     pthread_mutex_unlock(&dev->list_lock);
-    
+
     ALOGD("---------- total %d count %d -------------\n", total, cnt);
-    
+
     return 0;
 }
 
@@ -108,7 +125,7 @@ inline int vpu_mem_judge_used_heaps_type()
         ALOGV("USE ION_SYSTEM_HEAP");
         return ION_HEAP(ION_VMALLOC_HEAP_ID);
     }
-    
+
     return 0;
 }
 
@@ -160,7 +177,7 @@ static int vpu_dmabuf_alloc(struct vpu_dmabuf_dev *idev, size_t size, VPUMemLine
 
     DMABUF_DBG("handle %p\n", dmabuf->handle);
 
-    err = ion_map(dev->ion_client, dmabuf->handle, size, PROT_READ | PROT_WRITE, 
+    err = ion_map(dev->ion_client, dmabuf->handle, size, PROT_READ | PROT_WRITE,
                   MAP_SHARED, (off_t)0, (unsigned char**)&dmabuf->vir_addr, &map_fd);
     if (err) {
         DMABUF_ERR("ion map failed\n");
@@ -180,13 +197,13 @@ static int vpu_dmabuf_alloc(struct vpu_dmabuf_dev *idev, size_t size, VPUMemLine
     } else {
         dmabuf->cfg.map_fd = map_fd;
     }
-    
+
     dmabuf->size = size;//phys_data.size;
     dmabuf->origin_fd = -1;
     dmabuf->hdl = map_fd;
-#if ENABLE_DUPLICATE_WITH_REF    
+#if ENABLE_DUPLICATE_WITH_REF
     atomic_set(&dmabuf->ref_cnt, 1);
-#endif    
+#endif
 
     dmabuf->status = DMABUF_STATUS_ALLOC;
 
@@ -195,10 +212,10 @@ static int vpu_dmabuf_alloc(struct vpu_dmabuf_dev *idev, size_t size, VPUMemLine
     INIT_LIST_HEAD(&dmabuf->mgr_lnk);
     list_add_tail(&dmabuf->mgr_lnk, &dev->mem_list);
     pthread_mutex_unlock(&dev->list_lock);
-    
+
 #if ENABLE_MEMORY_DUMP
     vpu_dmabuf_dump(idev, __func__);
-#endif    
+#endif
 #endif
 
     *data = (VPUMemLinear_t*)dmabuf;
@@ -214,20 +231,20 @@ static int vpu_dmabuf_free(struct vpu_dmabuf_dev *idev, VPUMemLinear_t *idata)
     VPUMemLinear_dmabuf *data = (VPUMemLinear_dmabuf*)idata;
     vpu_dmabuf_dev_impl *dev = (vpu_dmabuf_dev_impl*)idev;
     int ref;
-    
+
     if (dev == NULL || data == NULL) {
         DMABUF_ERR("input parameters invalidate\n");
         return -EINVAL;
     }
-    
+
 #if ENABLE_DUPLICATE_WITH_REF
     atomic_dec(&data->ref_cnt);
     ref = atomic_read(&data->ref_cnt);
     if (ref > 0) {
         return 0;
     }
-#endif    
-    
+#endif
+
 #if ENABLE_MEMORY_MANAGE
     {
         VPUMemLinear_dmabuf *ldata = NULL, *n;
@@ -285,10 +302,10 @@ static int vpu_dmabuf_free(struct vpu_dmabuf_dev *idev, VPUMemLinear_t *idata)
     pthread_mutex_lock(&dev->list_lock);
     list_del_init(&data->mgr_lnk);
     pthread_mutex_unlock(&dev->list_lock);
-    
+
 #if ENABLE_MEMORY_DUMP
     vpu_dmabuf_dump(idev, __func__);
-#endif    
+#endif
 #endif
 
     free(data);
@@ -298,8 +315,8 @@ static int vpu_dmabuf_free(struct vpu_dmabuf_dev *idev, VPUMemLinear_t *idata)
     return 0;
 }
 
-static int vpu_dmabuf_share(struct vpu_dmabuf_dev *idev, 
-                            VPUMemLinear_t *idata, 
+static int vpu_dmabuf_share(struct vpu_dmabuf_dev *idev,
+                            VPUMemLinear_t *idata,
                             VPUMemLinear_t **out_data)
 {
     int err = 0;
@@ -312,17 +329,17 @@ static int vpu_dmabuf_share(struct vpu_dmabuf_dev *idev,
         DMABUF_ERR("input paramters invalidate\n");
         return -EINVAL;
     }
-    
-#if ENABLE_DUPLICATE_WITH_REF        
+
+#if ENABLE_DUPLICATE_WITH_REF
     atomic_inc(&data->ref_cnt);
     *out_data = idata;
     return 0;
-#endif    
+#endif
 
 #if ENABLE_MEMORY_MANAGE
     {
         VPUMemLinear_dmabuf *ldata = NULL, *n;
-        
+
         pthread_mutex_lock(&dev->list_lock);
         list_for_each_entry_safe(ldata, n, &dev->mem_list, mgr_lnk) {
             if (ldata->hdl == data->hdl) {
@@ -393,8 +410,8 @@ static int vpu_dmabuf_share(struct vpu_dmabuf_dev *idev,
     return 0;
 }
 
-static int vpu_dmabuf_map(struct vpu_dmabuf_dev *idev, 
-                          int share_fd, size_t size, 
+static int vpu_dmabuf_map(struct vpu_dmabuf_dev *idev,
+                          int share_fd, size_t size,
                           VPUMemLinear_t **data)
 {
     int err = 0;
@@ -421,8 +438,8 @@ static int vpu_dmabuf_map(struct vpu_dmabuf_dev *idev,
     } else {
 #if ENABLE_DUPLICATE_WITH_REF
         return 0;
-#endif        
-        
+#endif
+
         dmabuf = (VPUMemLinear_dmabuf*)*data;
         share_fd = dmabuf->hdl;
 
@@ -437,7 +454,7 @@ static int vpu_dmabuf_map(struct vpu_dmabuf_dev *idev,
     if (!bAlloc) {
 #if ENABLE_MEMORY_MANAGE
         VPUMemLinear_dmabuf *ldata = NULL, *n;
-        
+
         pthread_mutex_lock(&dev->list_lock);
         list_for_each_entry_safe(ldata, n, &dev->mem_list, mgr_lnk) {
             if (ldata->hdl == dmabuf->hdl) {
@@ -518,10 +535,10 @@ static int vpu_dmabuf_map(struct vpu_dmabuf_dev *idev,
     INIT_LIST_HEAD(&dmabuf->mgr_lnk);
     list_add_tail(&dmabuf->mgr_lnk, &dev->mem_list);
     pthread_mutex_unlock(&dev->list_lock);
-    
-#if ENABLE_MEMORY_DUMP    
+
+#if ENABLE_MEMORY_DUMP
     vpu_dmabuf_dump(idev, __func__);
-#endif    
+#endif
 #endif
 
     *data = (VPUMemLinear_t*)dmabuf;
@@ -539,7 +556,7 @@ static int vpu_dmabuf_get_phyaddress(struct vpu_dmabuf_dev *idev,
     struct ion_phys_data phys_data;
     VPUMemLinear_dmabuf *dmabuf;
     vpu_dmabuf_dev_impl *dev = (vpu_dmabuf_dev_impl*)idev;
-    ion_user_handle_t * handle = NULL;
+    ion_user_handle_t  handle = 0;
 
     if (dev == NULL) {
         DMABUF_ERR("device is NULL\n");
@@ -577,17 +594,17 @@ static int vpu_dmabuf_unmap(struct vpu_dmabuf_dev *idev, VPUMemLinear_t *idata)
         DMABUF_ERR("vpu dmabuf unmap input paramters invalidate\n");
         return -EINVAL;
     }
-    
+
 #if ENABLE_DUPLICATE_WITH_REF
     atomic_dec(&data->ref_cnt);
     ref = atomic_read(&data->ref_cnt);
     if (ref > 0) {
         return 0;
     }
-#endif        
+#endif
 
     DMABUF_DBG("vir_addr %p, size %d\n", data->vir_addr, data->size);
-    
+
 #if ENABLE_MEMORY_DUMP
     ALOGD("[%02d]\t%08d @ 0x%08x (%s)\n", data->hdl, data->size, data->cfg.phy_addr, "unmap");
 #endif
@@ -597,22 +614,22 @@ static int vpu_dmabuf_unmap(struct vpu_dmabuf_dev *idev, VPUMemLinear_t *idata)
         DMABUF_DBG("munmap failed\n");
         return err;
     }
-    
+
     err = ion_free(dev->ion_client, data->handle);
     if (err) {
         DMABUF_ERR("ion free failed, handle %d\n", data->handle);
         return err;
     }
-    
+
 #if ENABLE_MEMORY_MANAGE
     pthread_mutex_lock(&dev->list_lock);
     list_del_init(&data->mgr_lnk);
     pthread_mutex_unlock(&dev->list_lock);
-    
-#if ENABLE_MEMORY_DUMP        
+
+#if ENABLE_MEMORY_DUMP
     vpu_dmabuf_dump(idev, __func__);
-#endif    
-#endif    
+#endif
+#endif
 
     free(data);
 
@@ -622,7 +639,7 @@ static int vpu_dmabuf_unmap(struct vpu_dmabuf_dev *idev, VPUMemLinear_t *idata)
 static int vpu_dmabuf_reserve_private_data(VPUMemLinear_t *idata, int origin_fd, void *priv)
 {
     VPUMemLinear_dmabuf *data = (VPUMemLinear_dmabuf*)idata;
-    
+
     if (data == NULL || priv == NULL) {
         DMABUF_ERR("vpu dmabuf reserve input parameters invalidate\n");
         return -EINVAL;
@@ -703,7 +720,7 @@ int vpu_dmabuf_open(unsigned long align, struct vpu_dmabuf_dev **dev, char *titl
     d->get_priv = vpu_dmabuf_get_priv;
     d->get_phyaddr = vpu_dmabuf_get_phyaddress;
     d->align = align;
-    
+
     if (strlen(title) != 0) {
         strcpy(d->title, title);
     } else {

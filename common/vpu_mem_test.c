@@ -1,3 +1,30 @@
+/*
+ *
+ * Copyright 2014 Rockchip Electronics S.LSI Co. LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+   * File:
+   * vpu_mem_test.c
+   * Description:
+   * mem_test
+   * Author:
+   *     Alpha Lin
+   * Date:
+   *    2014-1-23
+ */
+
 #include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
@@ -61,7 +88,7 @@ void vpu_mem_share_test()
         cpu_ptr = (unsigned char*)mmap( NULL, 1920*1088*3/2, PROT_READ | PROT_WRITE, MAP_SHARED, shared_fd, 0 );
 
         strcpy(cpu_ptr, "master");
-        
+
         ALOGE("parent: fd = %d\n", shared_fd);
 #if 0
         write(pipe_i[1], &shared_fd, 4);
@@ -212,7 +239,7 @@ void vpu_mem_share_test()
         strcpy(lnkmem.vir_addr, "lnkmem");
 
         VPUMemDuplicate(&cpymem, &lnkmem);
-        
+
         ALOGE("parent: fd = %d\n", cpymem.offset);
 #if 0
         write(pipe_i[1], &shared_fd, 4);
@@ -367,7 +394,7 @@ int vpu_mem_alloc_test()
             int map_fd;
 
             ALOGE("count %d\n", i);
-            
+
             if (0 > ion_alloc(ion_client, len, 0, 2, 0, &handle)) {
                 ALOGE("%s, ion_alloc failed\n", __func__);
             }
@@ -381,7 +408,7 @@ int vpu_mem_alloc_test()
                 data.cmd = ION_IOC_GET_PHYS;
                 phys_data.handle = handle;
                 data.arg = (unsigned long)&phys_data;
-                
+
                 err = ioctl(ion_client, ION_IOC_CUSTOM, &data);
                 if (err < 0) {
                     ALOGE("%s: ION_IOC_CUSTOM (%d) failed with error - %s",
@@ -431,7 +458,7 @@ int vpu_mem_from_fd_test()
         VPUMallocLinearFromRender(&vpumem, len);
 
         ALOGE("%s %d, phy_addr %x, vir_addr %x\n", __func__, __LINE__, vpumem.phy_addr, vpumem.vir_addr);
-        
+
         VPUMemDuplicate(&lnkmem, &vpumem);
 
         VPUMemLink(&lnkmem);
@@ -446,13 +473,13 @@ int vpu_mem_from_fd_test()
 #endif
 
         while (cnt-- > 0) {
-        
+
             ALOGE("cnt %d\n", cnt);
 #if 0
             VPUMallocLinearFromRender(&vpumem, len);
 
             ALOGE("%s %d, phy_addr %x, vir_addr %x\n", __func__, __LINE__, vpumem.phy_addr, vpumem.vir_addr);
-            
+
             VPUMemDuplicate(&lnkmem, &vpumem);
 
             VPUMemLink(&lnkmem);
@@ -535,7 +562,7 @@ void ion_mytest1()
         unsigned char *ptrx;
         int map_fd;
     	printf("%s: TEST %d\n", __func__, count++);
-        
+
         ion_share(fd, handle, &share_fd);
 
         ion_import(fd, share_fd, &handle2);
@@ -559,7 +586,7 @@ void ion_mytest1()
 
     	/* clean up properly */
     	munmap(ptrx, len);
-    	
+
         ret = ion_free(fd, handle2);
         close(share_fd);
     	//close(map_fd);

@@ -19,20 +19,39 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
     RKOMXPlugin.cpp
-    
 
+#enable log
+#LOCAL_CFLAGS += -DLOG_NDEBUG=0
+
+USE_ROCKCHIP_OMX:=true
+
+ifeq ($(USE_ROCKCHIP_OMX),true)
+    LOCAL_CFLAGS += -DUSE_ROCKCHIP_OMX
+endif
+
+ifeq ($(USE_MEDIASDK),true)
+    LOCAL_CFLAGS += -DUSE_MEDIASDK
+endif
+
+ifeq ($(USE_INTEL_MDP),true)
+    LOCAL_CFLAGS += -DUSE_INTEL_MDP
+endif
 
 LOCAL_C_INCLUDES:= \
-    $(TOP)/frameworks/native/include/media/openmax \
-    $(TOP)/frameworks/native/include/media/hardware
+        $(call include-path-for, frameworks-native)/media/hardware \
+        $(call include-path-for, frameworks-native)/media/openmax
 
 LOCAL_SHARED_LIBRARIES :=       \
+        libbinder               \
         libutils                \
         libcutils               \
-        libdl		        \
-        libui\
+        libui                   \
+        libdl                   \
+        libstagefright_foundation
 
 LOCAL_MODULE := libstagefrighthw
 LOCAL_PRELINK_MODULE := false
+LOCAL_MODULE_OWNER := rockchip,intel
+
 include $(BUILD_SHARED_LIBRARY)
 

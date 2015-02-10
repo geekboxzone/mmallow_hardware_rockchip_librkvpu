@@ -40,7 +40,11 @@ int32_t Rockchip_get_gralloc_private(uint32_t *handle,gralloc_private_handle_t *
     }
     private_handle_t *priv_hnd = (private_handle_t *)handle;
     private_hnd->format = priv_hnd->format;
+#ifdef GPU_G6110
+    private_hnd->share_fd = priv_hnd->fd[0];
+#else
     private_hnd->share_fd = priv_hnd->share_fd;
+#endif
     private_hnd->stride = priv_hnd->stride;
     private_hnd->type = priv_hnd->type;
     return 0;

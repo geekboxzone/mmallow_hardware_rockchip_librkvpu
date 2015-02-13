@@ -19,6 +19,10 @@ else
 	LOCAL_CFLAGS += -Wno-multichar 
 endif
 
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)),rk3368)
+LOCAL_CFLAGS += -DTARGET_BOARD_PLATFORM_RK3368
+endif
+
 LOCAL_ARM_MODE := arm
 
 LOCAL_PRELINK_MODULE := false

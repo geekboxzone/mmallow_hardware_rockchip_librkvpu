@@ -65,9 +65,16 @@
 #define VPU_IOC_SET_REG                     _IOW(VPU_IOC_MAGIC, 3, unsigned long)
 #define VPU_IOC_GET_REG                     _IOW(VPU_IOC_MAGIC, 4, unsigned long)
 #define VPU_IOC_PROBE_IOMMU_STATUS          _IOR(VPU_IOC_MAGIC, 5, unsigned long)
+
+#ifdef TARGET_BOARD_PLATFORM_RK3368
+#define RK_BIT  RK_U64
+#else
+#define RK_BIT  RK_U32*
+#endif
+
 typedef struct VPUReq
 {
-    RK_U32 *req;
+    RK_BIT  req;
     RK_U32  size;
 } VPUReq_t;
 static int vpu_service_status = -1;

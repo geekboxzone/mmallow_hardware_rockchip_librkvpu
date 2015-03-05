@@ -59,7 +59,7 @@ OMX_ERRORTYPE RKOMXPlugin::AddCore(const char* coreName)
         core->mLibHandle = libHandle;
 		if (isRKCore) {
             core->mInit = (RKOMXCore::InitFunc)dlsym(libHandle, "RKOMX_Init");
-            core->mDeinit = (RKOMXCore::DeinitFunc)dlsym(libHandle, "RKOMX_Deinit");
+            core->mDeinit = (RKOMXCore::DeinitFunc)dlsym(libHandle, "RKOMX_DeInit");
 
             core->mComponentNameEnum =
             (RKOMXCore::ComponentNameEnumFunc)dlsym(libHandle, "RKOMX_ComponentNameEnum");

@@ -33,13 +33,13 @@ extern "C"
 #define VPU_HW_WAIT_TIMEOUT             1
 
 // 解码器：60 个寄存器，大小 240B
-#define VPU_REG_NUM_DEC                 (60)
+#define VPU_REG_NUM_DEC                 (159)
 // 后处理：41 个寄存器，大小 164B
-#define VPU_REG_NUM_PP                  (41)
+#define VPU_REG_NUM_PP                  (42)
 // 解码器加后处理：101 个寄存器，大小 404B
-#define VPU_REG_NUM_DEC_PP              (VPU_REG_NUM_DEC+VPU_REG_NUM_PP)
+#define VPU_REG_NUM_DEC_PP              (159)
 // 编码器：96 个寄存器，大小 384B
-#define VPU_REG_NUM_ENC                 (96)
+#define VPU_REG_NUM_ENC                 (184)
 
 typedef enum
 {

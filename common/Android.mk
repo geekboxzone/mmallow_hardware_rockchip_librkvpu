@@ -44,7 +44,8 @@ LOCAL_SRC_FILES := vpu_mem_dmabuf.c \
 				   vpu_mem_pool/vpu_mem_pool.c \
 				   vpu_mem_pool/vpu_dma_buf.c \
 				   vpu.c \
-				   vpu_mem_pool/tsemaphore.c
+				   vpu_mem_pool/tsemaphore.c	\
+				   ppOp.cpp
 
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)

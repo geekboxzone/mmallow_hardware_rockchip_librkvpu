@@ -1,3 +1,29 @@
+/*
+ *
+ * Copyright 2010 Rockchip Electronics S.LSI Co. LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+   * File:
+   * ppOp.h
+   * Description:
+   * Global struct definition in VPU module
+   * Author:
+   *     Wu JunMin
+   * Date:
+   *    2015-03-31 14:43:40
+ */
 #ifndef _PPOP_H_
 #define _PPOP_H_
 
@@ -22,6 +48,13 @@ namespace android {
 #define PP_OUT_FORMAT_YUV422INTERLAVE               3
 #define PP_OUT_FORMAT_YUV420INTERLAVE               5
 
+#define PP_ROTATION_NONE                                0U
+#define PP_ROTATION_RIGHT_90                            1U
+#define PP_ROTATION_LEFT_90                             2U
+#define PP_ROTATION_HOR_FLIP                            3U
+#define PP_ROTATION_VER_FLIP                            4U
+#define PP_ROTATION_180                                 5U
+
 typedef struct {
     uint32_t srcAddr;           // 16 align
     uint32_t srcFormat;
@@ -29,6 +62,10 @@ typedef struct {
     uint32_t srcHeight;         // 16 align max 2048
     uint32_t srcHStride;        // 16 align max 2048
     uint32_t srcVStride;        // 16 align max 2048
+    uint32_t srcCrop8R;         // crop rigth
+    uint32_t srcCrop8D;         // crop down      
+    uint32_t srcX;                  // src x
+    uint32_t srcY;                  // src y     
     uint32_t srcReserv[2];
 
     uint32_t dstAddr;           // 16 align
@@ -38,7 +75,9 @@ typedef struct {
     uint32_t dstHStride;        // 16 align max 2048
     uint32_t dstVStride;        // 16 align max 2048
     uint32_t dstReserv[2];
-
+    uint32_t dstX;                  // dst x
+    uint32_t dstY;                  // dst y
+    
     uint32_t vpuFd;             // VPUClient handle
     uint32_t rotation;          // rotation angel
     uint32_t yuvFullRange;      // yuv is full range or not, set yuv trans table

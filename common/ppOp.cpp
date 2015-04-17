@@ -481,6 +481,36 @@ status_t ppOpInit(PP_OP_HANDLE *hnd, PP_OPERATION *init)
         if (reg) free(reg);
         return BAD_VALUE;
     }
+
+    {
+		unsigned int		inw,inh;
+		unsigned int		outw,outh;
+
+        if(init->rotation == PP_ROTATION_RIGHT_90 || init->rotation == PP_ROTATION_LEFT_90)
+        {
+    		outw = init->dstWidth - 1;//outWidth -1;
+    		outh = init->dstHeight - 1;//outHeight -1;
+    		inw = init->srcHeight - 1;//inWidth -1;
+    		inh = init->srcWidth -1;//p->srcHeight - 1;//inHeigth -1;        		
+        }else
+        {
+    		outw = init->dstWidth - 1;//outWidth -1;
+    		outh = init->dstHeight - 1;//outHeight -1;        
+    		inw = init->srcWidth - 1;//inWidth -1;
+    		inh = init->srcHeight -1;//p->srcHeight - 1;//inHeigth -1;        		
+        }
+        if((outw > inw && outh < inh) || (outw < inw && outh > inh))
+        {
+            ALOGD("PP operat error width and height scale mode is different!");
+            return BAD_VALUE;
+        }
+        if((outw > 3*inw) || (outh > 3*(inh-2)))
+        {
+            ALOGD("PP operat error because scale rate more than 3x!");
+            return BAD_VALUE;
+        }        
+    }
+
     //ALOGI("ppSetSrcFormat");
     p->updated = 1;
     p->reg = reg;

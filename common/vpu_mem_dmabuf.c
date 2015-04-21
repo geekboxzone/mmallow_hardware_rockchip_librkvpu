@@ -464,8 +464,18 @@ RK_S32 VPUMallocLinearFromRender(VPUMemLinear_t *p, RK_U32 size, void *ctx)
 #else
         dmabuf_from_pool = pool->get_free(pool);
         if (dmabuf_from_pool == NULL) {
-            VPM_ERROR("DMABUF: get free one from pool failed\n");
-            break;
+            VPM_DEBUG("DMABUF: get free one from pool failed used alloc directly \n");
+            return VPUMallocLinear(p, size);
+        }
+
+      if(size > dmabuf_from_pool->size){
+            ALOGE("mem pool realsize is small than decoder need");
+            int dmabuf_fd = dev->get_fd(dmabuf_from_pool);
+            pool->put_used(pool, dmabuf_fd);
+            if(pool->version == 1){
+                pool->buff_size = -1;
+            }
+            return VPUMallocLinear(p, size);
         }
 
         if (0 > dev->share(dev, dmabuf_from_pool, &p_dmabuf)) {

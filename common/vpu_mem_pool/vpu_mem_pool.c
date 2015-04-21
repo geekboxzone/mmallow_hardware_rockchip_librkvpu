@@ -639,6 +639,7 @@ static void* get_free_memory_vpumem(vpu_display_mem_pool *p)
 
             atomic_inc(&mblk->ref);
             pthread_mutex_unlock(&p_mempool->list_mutex);
+            mblk->dmabuf->size = mblk->buff_size;
             return (void*)mblk->dmabuf;
         }
     }
@@ -681,7 +682,7 @@ void* vpu_mem_allocator(void *param)
         //VPUMemLinear_t *dmabuf;
         int share_fd;
         int total_size;
-
+        int pool_size = pool->size;
         tsem_down(&pool->alloc_sem);
 
         if (!pool->run_flag) {
@@ -705,20 +706,20 @@ void* vpu_mem_allocator(void *param)
 			continue;
 	}
 
-        if (0 > ion_alloc_fd(pool->ion_client, pool->size, 4096, vpu_mem_judge_used_heaps_type(), 0, &share_fd)) {
+    if (0 > ion_alloc_fd(pool->ion_client, pool_size, 4096, vpu_mem_judge_used_heaps_type(), 0, &share_fd)) {
             MBLK_ERR("ion_alloc_fd failed\n");
 	    pool->wait_recalim_flag = true;
             continue;
         }
 
 #if VPU_MEMORY_POOL_MANAGER_ENABLE
-        atomic_add(pool->size, &pool_manager.total_mem_size);
+        atomic_add(pool_size, &pool_manager.total_mem_size);
         MBLK_INF("vpu memory pool size (%d)\n", atomic_read(&pool_manager.total_mem_size));
 #endif
 
         MBLK_INF("ion_alloc_fd success, memory fd %d\n", share_fd);
 
-        if (0 > commit_memory_handle((vpu_display_mem_pool*)pool, share_fd, pool->size)) {
+        if (0 > commit_memory_handle((vpu_display_mem_pool*)pool, share_fd,pool_size)) {
             MBLK_ERR("commit memory_handle failed, memory fd %d\n", share_fd);
             close(share_fd);
             continue;

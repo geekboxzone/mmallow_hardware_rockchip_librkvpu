@@ -417,7 +417,15 @@ status_t ppOpUpdate(PP_INTERNAL *hnd)
         		inw = p->srcWidth - 1;//inWidth -1;
         		inh = p->srcHeight -1;//p->srcHeight - 1;//inHeigth -1;        		
             }
-            #if PPOP_DEBUG
+            if(outh > inh && p->srcCrop8D)
+            {
+                inh = inh&(~15);
+            }
+            if(outw > inw && p->srcCrop8R)
+            {
+                inw = inw&(~15);
+            }
+	    #if PPOP_DEBUG
             ALOGD("p->rotation=%d, outw=%d, outh=%d, p->srcCrop8D=%d, p->srcCrop8R=%d\n", p->rotation, outw, outh, p->srcCrop8D, p->srcCrop8R);
             #endif
             SetPpRegister(reg, HWIF_PP_CROP8_R_E, p->srcCrop8R);

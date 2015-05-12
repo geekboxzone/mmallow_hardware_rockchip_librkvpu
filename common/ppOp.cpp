@@ -287,8 +287,15 @@ status_t ppOpUpdate(PP_INTERNAL *hnd)
 {
     PP_INTERNAL *p = hnd;
     VPUReg *reg = p->reg;
-    int     srcwid_alig16 = (p->srcWidth+15)&(~15);
-    int     srchei_alig16 = (p->srcHeight+15)&(~15);        
+    int     srcwid_alig16;
+    int     srchei_alig16;   
+    if ( p->optReserv[0] )
+    {
+        p->srcWidth = p->srcWidth&(~15);
+        p->srcHeight = p->srcHeight&(~15);
+    }
+    srcwid_alig16 = (p->srcWidth+15)&(~15);
+    srchei_alig16 = (p->srcHeight+15)&(~15);        
     if (p->updated) {
         //get srcCrop para
         if(srcwid_alig16 != p->srcWidth)
@@ -516,7 +523,11 @@ status_t ppOpInit(PP_OP_HANDLE *hnd, PP_OPERATION *init)
         {
             ALOGD("PP operat error because scale rate more than 3x!");
             return BAD_VALUE;
-        }        
+        }       
+        if( outw > inw && outh > inh)
+            p->optReserv[0] = 1;
+        else
+            p->optReserv[0] = 0;	
     }
 
     //ALOGI("ppSetSrcFormat");

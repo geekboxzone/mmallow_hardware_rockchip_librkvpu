@@ -67,14 +67,14 @@ typedef struct VPUHwDecConfig
     RK_U32 mpeg2Support;           /* HW supports MPEG-2 */
     RK_U32 ppSupport;              /* HW supports post-processor */
     RK_U32 ppConfig;               /* HW post-processor functions bitmask */
-    RK_U32 sorensonSparkSupport;   /* HW supports Sorenson Spark */
+    RK_U32 resv3Support;
     RK_U32 refBufSupport;          /* HW supports reference picture buffering */
-    RK_U32 vp6Support;             /* HW supports VP6 */
+    RK_U32 resv2Support;
     RK_U32 vp7Support;             /* HW supports VP7 */
     RK_U32 vp8Support;             /* HW supports VP8 */
     RK_U32 avsSupport;             /* HW supports AVS */
     RK_U32 jpegESupport;           /* HW supports JPEG extensions */
-    RK_U32 rvSupport;              /* HW supports REAL */
+    RK_U32 resv0Support;
     RK_U32 mvcSupport;             /* HW supports H264 MVC extension */
 } VPUHwDecConfig_t;
 

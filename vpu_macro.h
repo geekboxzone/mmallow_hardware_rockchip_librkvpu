@@ -57,8 +57,6 @@
 #define  VPU_CODEC_DEC_VC1      4
 #define  VPU_CODEC_DEC_MPEG2      5
 #define  VPU_CODEC_DEC_MPEG1      6
-#define  VPU_CODEC_DEC_VP6      7
-#define  VPU_CODEC_DEC_RV      8
 #define  VPU_CODEC_DEC_VP7      9
 #define  VPU_CODEC_DEC_VP8      10
 #define  VPU_CODEC_DEC_AVS      11
@@ -69,9 +67,6 @@
 #define  VPU_CODEC_ENC_JPEG      16
 #define  VPU_CODEC_ENC_H264      17
 #define  VPU_CODEC_DEC_MJPEG     18
-/*@jh: ∂ÓÕ‚∏Ωº”*/
-#define     VPU_CODEC_DEC_DIVX3                     18
-#define     VPU_CODEC_DEC_SORESONSPARKLE            19
 
 #define     VPU_OUTPUT_FRAME_TYPE      0
 #define     VPU_OUTPUT_TOP_FIELD_FIRST_TYPE    1

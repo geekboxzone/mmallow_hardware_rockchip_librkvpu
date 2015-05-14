@@ -99,15 +99,15 @@ typedef enum OMX_RK_VIDEO_CODINGTYPE {
     OMX_RK_VIDEO_CodingH263,       /**< H.263 */
     OMX_RK_VIDEO_CodingMPEG4,      /**< MPEG-4 */
     OMX_RK_VIDEO_CodingWMV,        /**< Windows Media Video (WMV1,WMV2,WMV3)*/
-    OMX_RK_VIDEO_CodingRV,         /**< all versions of Real Video */
+    OMX_RK_VIDEO_CodingRESV0,
     OMX_RK_VIDEO_CodingAVC,        /**< H.264/AVC */
     OMX_RK_VIDEO_CodingMJPEG,      /**< Motion JPEG */
     OMX_RK_VIDEO_CodingVP8,                     /**< VP8 */
     OMX_RK_VIDEO_CodingVP9,                     /**< VP9 */
     OMX_RK_VIDEO_CodingVC1 = 0x01000000, /**< Windows Media Video (WMV1,WMV2,WMV3)*/
-    OMX_RK_VIDEO_CodingFLV1,       /**< Sorenson H.263 */
-    OMX_RK_VIDEO_CodingDIVX3,                   /**< DIVX3 */
-    OMX_RK_VIDEO_CodingVP6,
+    OMX_RK_VIDEO_CodingFLV1,
+    OMX_RK_VIDEO_CodingRESV1,
+    OMX_RK_VIDEO_CodingRESV2,
     OMX_RK_VIDEO_CodingHEVC,        /**< H.265/HEVC */
     OMX_RK_VIDEO_CodingKhronosExtensions = 0x6F000000, /**< Reserved region for introducing Khronos Standard Extensions */
     OMX_RK_VIDEO_CodingVendorStartUnused = 0x7F000000, /**< Reserved region for introducing Vendor Extensions */

@@ -65,6 +65,9 @@ ENDCLASS(vpu_dmabuf_dev_impl)
 
 char dmabuf_status[5][6] = {"inval", "alloc", "share", "inval", "map"};
 
+#define ION_HEAP_INVALID_ID (~(ION_HEAP(ION_CARVEOUT_HEAP_ID) | ION_HEAP(ION_CMA_HEAP_ID) | ION_HEAP(ION_VMALLOC_HEAP_ID)))
+static int g_heap_mask = ION_HEAP_INVALID_ID;
+
 union addr_cfg {
     RK_U32 map_fd;
     RK_U32 phy_addr;
@@ -116,11 +119,41 @@ int vpu_dmabuf_dump(struct vpu_dmabuf_dev *idev, const char *parent)
     return 0;
 }
 
+static int ion_heap_type_test(int heap_mask)
+{
+    int ion_client;
+    struct ion_handle *handle;
+
+    if (g_heap_mask != ION_HEAP_INVALID_ID) {
+        return g_heap_mask;
+    }
+        
+    ion_client = ion_open();
+
+    if (ion_alloc(ion_client, 1, 0, heap_mask, 0, &handle) < 0) {
+        ion_close(ion_client);
+        return ION_HEAP_INVALID_ID;
+    }
+
+    ion_free(ion_client, handle);
+    ion_close(ion_client);
+
+    g_heap_mask = heap_mask;
+
+    return g_heap_mask;
+}
+
 inline int vpu_mem_judge_used_heaps_type()
 {
     // TODO, use property_get
     if (!VPUClientGetIOMMUStatus() > 0) {
-        return ION_HEAP(ION_CMA_HEAP_ID);
+        if (ion_heap_type_test(ION_HEAP(ION_CARVEOUT_HEAP_ID)) == ION_HEAP(ION_CARVEOUT_HEAP_ID)) {
+            ALOGV("USE ION_CARVEOUT_HEAP_ID");
+            return ION_HEAP(ION_CARVEOUT_HEAP_ID);
+        } else if (ion_heap_type_test(ION_HEAP(ION_CMA_HEAP_ID)) == ION_HEAP(ION_CMA_HEAP_ID)) {
+            ALOGV("USE ION_CMA_HEAP_ID");
+            return ION_HEAP(ION_CMA_HEAP_ID);
+        }
     } else {
         ALOGV("USE ION_SYSTEM_HEAP");
         return ION_HEAP(ION_VMALLOC_HEAP_ID);
@@ -185,7 +218,7 @@ static int vpu_dmabuf_alloc(struct vpu_dmabuf_dev *idev, size_t size, VPUMemLine
         return err;
     }
 
-    if (vpu_mem_judge_used_heaps_type() == ION_HEAP(ION_CMA_HEAP_ID)) {
+    if (vpu_mem_judge_used_heaps_type() != ION_HEAP(ION_VMALLOC_HEAP_ID)) {
         phys_data.handle = dmabuf->handle;
         err = ion_custom_op(dev, ION_IOC_GET_PHYS, &phys_data);
         if (err) {
@@ -508,7 +541,7 @@ static int vpu_dmabuf_map(struct vpu_dmabuf_dev *idev,
         return -EINVAL;
     }
 
-    if (vpu_mem_judge_used_heaps_type() == ION_HEAP(ION_CMA_HEAP_ID)) {
+    if (vpu_mem_judge_used_heaps_type() != ION_HEAP(ION_VMALLOC_HEAP_ID)) {
         phys_data.handle = dmabuf->handle;
         err = ion_custom_op(dev, ION_IOC_GET_PHYS, &phys_data);
         if (err) {
@@ -567,7 +600,7 @@ static int vpu_dmabuf_get_phyaddress(struct vpu_dmabuf_dev *idev,
         DMABUF_ERR("ion import failed, share fd %d\n", share_fd);
         return err;
     }
-    if (vpu_mem_judge_used_heaps_type() == ION_HEAP(ION_CMA_HEAP_ID)) {
+    if (vpu_mem_judge_used_heaps_type() != ION_HEAP(ION_VMALLOC_HEAP_ID)) {
         phys_data.handle = handle;
         err = ion_custom_op(dev, ION_IOC_GET_PHYS, &phys_data);
         if (err) {

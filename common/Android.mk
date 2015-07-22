@@ -28,6 +28,7 @@ LOCAL_SHARED_LIBRARIES := libcutils libion
 LOCAL_STATIC_LIBRARIES := #ibion_vpu #libvpu_mem_pool
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH) \
+		    $(LOCAL_PATH)/.. \
 		    $(LOCAL_PATH)/include \
 		    $(LOCAL_PATH)/libvpu_mem_pool \
 		    $(TOP)/hardware/libhardware/include \
@@ -55,6 +56,7 @@ LOCAL_PRELINK_MODULE := false
 
 LOCAL_SHARED_LIBRARIES := libion libvpu libcutils
 LOCAL_C_INCLUDES := $(LOCAL_PATH) \
+		    $(LOCAL_PATH)/.. \
 		    $(LOCAL_PATH)/include \
 		    $(TOP)/hardware/libhardware/include
 LOCAL_SRC_FILES := vpu_mem.c
@@ -70,6 +72,7 @@ LOCAL_ARM_MODE := arm
 LOCAL_PRELINK_MODULE := false
 LOCAL_SHARED_LIBRARIES := libion libvpu libcutils
 LOCAL_C_INCLUDES := $(LOCAL_PATH) \
+		    $(LOCAL_PATH)/.. \
 		    $(LOCAL_PATH)/include \
 		    $(TOP)/hardware/libhardware/include
 LOCAL_SRC_FILES := vpu.c
@@ -86,6 +89,7 @@ LOCAL_ARM_MODE := arm
 LOCAL_PRELINK_MODULE := false
 LOCAL_SHARED_LIBRARIES := libion libvpu libcutils
 LOCAL_C_INCLUDES := $(LOCAL_PATH) \
+		    $(LOCAL_PATH)/.. \
 		    $(LOCAL_PATH)/include \
 		    $(TOP)/hardware/libhardware/include
 LOCAL_SRC_FILES := ppOp.cpp
@@ -100,6 +104,7 @@ LOCAL_ARM_MODE := arm
 LOCAL_PRELINK_MODULE := false
 LOCAL_SHARED_LIBRARIES := libion libvpu libcutils
 LOCAL_C_INCLUDES := $(LOCAL_PATH) \
+		    $(LOCAL_PATH)/.. \
 		    $(LOCAL_PATH)/include \
 		    $(TOP)/hardware/libhardware/include
 LOCAL_SRC_FILES := rk_list.cpp
@@ -155,6 +160,7 @@ LOCAL_PRELINK_MODULE := false
 LOCAL_CFLAGS += -DCONFIG_DUMP_VPU_MEM_APP
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH) \
+		    $(LOCAL_PATH)/.. \
 		    $(LOCAL_PATH)/include \
 		    $(LOCAL_PATH)/vpu_mem_pool \
 		    $(TOP)/system/core/include \
@@ -189,6 +195,7 @@ LOCAL_PRELINK_MODULE := false
 LOCAL_CFLAGS += -DVPU_MEMORY_BLOCK_TEST -DVPU_MBLK_DEBUG
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH) \
+		    $(LOCAL_PATH)/.. \
 		    $(LOCAL_PATH)/include \
 		    $(LOCAL_PATH)/vpu_mem_pool \
 		    $(TOP)/system/core/include

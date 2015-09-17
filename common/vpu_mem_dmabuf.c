@@ -104,6 +104,9 @@
 #define MAX_FD          (0x7FFF)
 #define INVAILD_PTR     ((void *)(-1))
 
+#ifndef PTHREAD_RECURSIVE_MUTEX_INITIALIZER
+#define PTHREAD_RECURSIVE_MUTEX_INITIALIZER PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+#endif
 typedef struct {
     pthread_mutex_t mutex;
     RK_U32 pool_en;

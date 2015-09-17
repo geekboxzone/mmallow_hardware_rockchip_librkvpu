@@ -2,6 +2,8 @@
 #include "rk_list.h"
 #include <utils/Log.h>
 #include <errno.h>
+#include <string.h>
+#include <malloc.h>
 #ifdef AVS40
 #undef ALOGV
 #define ALOGV LOGV

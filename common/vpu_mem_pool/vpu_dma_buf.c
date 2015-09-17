@@ -29,7 +29,7 @@
 #include "vpu_dma_buf.h"
 #include "atomic.h"
 #include "vpu.h"
-
+#include <errno.h>
 #define LOG_TAG "vpu_dma_buf"
 
 #define ENABLE_DUPLICATE_WITH_REF   1

@@ -41,7 +41,7 @@
 #include "tsemaphore.h"
 #include "vpu_mem.h"
 #include "vpu_dma_buf.h"
-
+#include <errno.h>
 struct vpu_memory_block {
     struct list_head lnk_status; // link to used or free list
     int mem_hdl;

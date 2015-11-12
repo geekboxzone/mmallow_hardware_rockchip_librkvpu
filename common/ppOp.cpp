@@ -133,7 +133,7 @@ typedef struct {
     uint32_t optReserv[9];
     uint32_t updated;           // update flag
     VPUReg  *reg;               // register set
-    uint32_t checkSum;
+    uint32_t *checkSum;
 } PP_INTERNAL;
 
 VPUReg::~VPUReg()
@@ -533,7 +533,7 @@ status_t ppOpInit(PP_OP_HANDLE *hnd, PP_OPERATION *init)
     //ALOGI("ppSetSrcFormat");
     p->updated = 1;
     p->reg = reg;
-    p->checkSum = (uint32_t)p;
+    p->checkSum = (uint32_t*)p;
     *hnd = (PP_OP_HANDLE)p;
     ppOpUpdate(p);
     return OK;
@@ -586,7 +586,7 @@ static status_t ppHnadleCheck(PP_INTERNAL *p)
         ALOGE("invalid NULL hnd");
         return BAD_VALUE;
     }
-    if (p->checkSum != (uint32_t)p) {
+    if (p->checkSum != (uint32_t*)p) {
         ALOGE("invalid hnd: %p checkSum 0x%.8x", p, p->checkSum);
         return BAD_VALUE;
     }

@@ -18,6 +18,8 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <linux/rockchip_ion.h>
 #include <ion/ion.h>

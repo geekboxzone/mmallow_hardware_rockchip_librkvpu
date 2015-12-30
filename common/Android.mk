@@ -8,6 +8,7 @@ BUILD_VPU_MEM_R_TEST := false
 BUILD_VPU_MEM_DUMP := false
 BUILD_VPU_POOL_TEST := false
 
+ifeq ($(filter rk312x, $(TARGET_BOARD_PLATFORM)), )
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libvpu
@@ -46,6 +47,7 @@ LOCAL_SRC_FILES := vpu_mem_dmabuf.c \
 
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)
+endif
 
 ifeq ($(BUILD_VPU_MEM_TEST),true)
 include $(CLEAR_VARS)

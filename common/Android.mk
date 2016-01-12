@@ -8,17 +8,23 @@ BUILD_VPU_MEM_R_TEST := false
 BUILD_VPU_MEM_DUMP := false
 BUILD_VPU_POOL_TEST := false
 
-ifeq ($(filter rk312x, $(TARGET_BOARD_PLATFORM)), )
+# use new vpu framework mpp
+USE_MPP := false
+ifneq ($(filter rk312x rk3368, $(strip $(TARGET_BOARD_PLATFORM))), )
+USE_MPP := true
+endif 
+
+ifeq ($(USE_MPP), false)
+
 include $(CLEAR_VARS)
-
 LOCAL_MODULE := libvpu
-
 ifeq ($(PLATFORM_VERSION),4.0.4)
 	LOCAL_CFLAGS := -DAVS40 \
 	-Wno-multichar 
 else
 	LOCAL_CFLAGS += -Wno-multichar 
 endif
+# end use vpu framework mpp
 
 LOCAL_ARM_MODE := arm
 

@@ -10,7 +10,7 @@ BUILD_VPU_POOL_TEST := false
 
 # use new vpu framework mpp
 USE_MPP := false
-ifneq ($(filter rk3366 rk3399 rk3228 rk3229 rk3288 rk322x, $(strip $(TARGET_BOARD_PLATFORM))), )
+ifneq ($(filter rk3366 rk3399 rk3228 rk3229 rk322x, $(strip $(TARGET_BOARD_PLATFORM))), )
 USE_MPP := true
 endif 
 
